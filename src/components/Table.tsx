@@ -1,23 +1,25 @@
 import React from "react";
 
-export type ColumnDefs = {
+export type ColumnDefs<T> = {
     title: string;
 } & (
-        | {
-            field: string;
-        }
-        | {
-            render: (rowData: Record<string, any>) => React.ReactNode;
-        }
-    );
+    | {
+        field: keyof T; // Menggunakan keyof untuk memastikan field valid
+    }
+    | {
+        render: (rowData: T) => React.ReactNode;
+    }
+);
 
-const Table = ({
+type TableProps<T> = {
+    columnDefs: ColumnDefs<T>[];
+    data: T[];
+};
+
+const Table = <T extends Record<string, any>>({
     columnDefs,
     data,
-}: {
-    columnDefs: ColumnDefs[];
-    data: Record<string, any>[];
-}) => {
+}: TableProps<T>) => {
     return (
         <table className="min-w-full divide-y overflow-hidden rounded-lg divide-gray-800 shadow-lg">
             <thead className="bg-green-200">
@@ -34,7 +36,7 @@ const Table = ({
                     <tr key={index} className="cursor-pointer hover:bg-gray-100">
                         {columnDefs.map((column, index) => (
                             <td key={index} className="px-6 py-4 whitespace-nowrap">
-                                {"field" in column ? rowData[column.field!] : column.render ? column.render(rowData) : null}
+                                {"field" in column ? rowData[column.field] : column.render ? column.render(rowData) : null}
                             </td>
                         ))}
                     </tr>
